@@ -1,0 +1,31 @@
+name: C 語言建置流程
+
+# 觸發條件：當 push 程式碼到任何分支時
+on: [push]
+
+jobs:
+  build:
+    # 執行環境：使用預裝了 GCC 的最新 Ubuntu 虛擬機
+    runs-on: ubuntu-latest
+    
+    steps:
+      # 步驟 1: 取得 repo 中的程式碼
+      - name: Checkout code
+        uses: actions/checkout@v4 
+        
+      # 步驟 2: 編譯 C 語言程式
+      # 使用 GCC 編譯 main.c，輸出名為 hello_c_app 的可執行檔
+      - name: Compile C program (GCC)
+        run: gcc main.c -o hello_c_app
+        
+      # 步驟 3: 運行並驗證程式（直接執行程式）
+      - name: Run compiled application
+        run: ./hello_c_app
+        
+      # 步驟 4: 上傳建置成品（可選）
+      # 將編譯好的可執行檔儲存為 Artifact，供下載
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: hello-c-executable
+          path: hello_c_app
