@@ -96,7 +96,7 @@ int main(){
 * 上傳到 GitHub Releases 或 GitHub Packages
 * 或是部署到某個測試伺服器（例如用 scp、ssh、docker push 等）。
 
-——-
+---
 
 ### 問題2: .github/workflows/c_build.yml 這個是什麼？有沒有比較正式的名稱？
 #### 答案2:
@@ -114,7 +114,7 @@ int main(){
   * 在 GitHub UI 上顯示的工作流程名稱，則是檔案裡 name: 那一行（如果有寫）；
   * 檔名只是在 repo 裡方便你區分不同 workflow。
 
-——-
+---
 
 ### 問題3: 這些 CI/CD 的 workflows actions 是誰提供的服務和資源？
 #### 答案3:
@@ -136,8 +136,7 @@ CI/CD 平台（GitHub Actions） + 執行工作用的機器（GitHub-hosted runn
   * 要在什麼事件觸發（push、pull_request…）
   * 要跑哪些步驟（checkout、安裝工具、編譯、測試、上傳 artifact…）
   * 這些內容是 repo 的維護者（也就是你或專案作者）自己寫的設定，GitHub 只是照著你寫的流程在雲端跑。
-  
-⸻
+
 
 3. 裡面用到的 actions（小積木）：GitHub 或社群提供
 
