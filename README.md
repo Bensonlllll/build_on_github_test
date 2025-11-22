@@ -70,19 +70,19 @@ int main(){
 在工作流程運行成功後，可以在摘要頁面找到並下載名為 `hello-c-executable` 的 **Artifact**，這就是編譯好的程式。
 
 
-## 問與答（thanks to Copilot!)
+## 問與答（many thanks to ChatGPT!)
 ### 問題1: https://github.com/Bensonlllll/build_on_github_test 這個 repo 是較有關 CI/CD 嗎？
 #### 答案1:
 是的，這個 repo 的重點就是示範 CI/CD（比較偏 CI）。
 
 從 README 可以看到，它在示範如何用 GitHub Actions 自動做這幾件事： ￼
 1. 自動建置 (Continuous Integration) 
-  * 每次 push 到任何分支就觸發 workflow。
-  * 在 Ubuntu runner 上執行 gcc main.c -o hello_c_app 做編譯。
+    * 每次 push 到任何分支就觸發 workflow。
+    * 在 Ubuntu runner 上執行 gcc main.c -o hello_c_app 做編譯。
 2. 自動執行與驗證程式
-  * 在 workflow 裡跑 ./hello_c_app，確認程式能正常輸出結果（Hello From C Build... 和 160）。
+    * 在 workflow 裡跑 ./hello_c_app，確認程式能正常輸出結果（Hello From C Build... 和 160）。
 3. 自動上傳建置產物 (Artifact)
-  * 使用 actions/upload-artifact@v4，把編好的 hello_c_app 上傳成 artifact，讓人可以從 Actions 頁面下載。
+    * 使用 actions/upload-artifact@v4，把編好的 hello_c_app 上傳成 artifact，讓人可以從 Actions 頁面下載。
 
 所以這個 repo 比較像是：
 
@@ -121,23 +121,23 @@ int main(){
 ⸻
 
 1. CI/CD 平台與跑程式的機器：GitHub 提供
-* 你在 .github/workflows/*.yml 裡寫的這些 workflows，實際上是交給 GitHub Actions 這個服務來執行。
-* GitHub（背後是 Microsoft 的雲端資源） 會在你 push、開 PR 等時，啟動一台暫時的虛擬機（runner），例如：
-* runs-on: ubuntu-latest → 就是在 GitHub 的雲端開一台 Ubuntu VM
-* 也可以是 windows-latest、macos-latest
-* 這些 VM 的 硬體資源、網路、作業系統 等，都是 GitHub 幫你準備好 的（對 public repo 免費、有使用額度限制）。
-
+  * 你在 .github/workflows/*.yml 裡寫的這些 workflows，實際上是交給 GitHub Actions 這個服務來執行。
+  * GitHub（背後是 Microsoft 的雲端資源） 會在你 push、開 PR 等時，啟動一台暫時的虛擬機（runner），例如：
+  * runs-on: ubuntu-latest → 就是在 GitHub 的雲端開一台 Ubuntu VM
+  * 也可以是 windows-latest、macos-latest
+  * 這些 VM 的 硬體資源、網路、作業系統 等，都是 GitHub 幫你準備好 的（對 public repo 免費、有使用額度限制）。
+  
 簡單講：
 CI/CD 平台（GitHub Actions） + 執行工作用的機器（GitHub-hosted runners）都是 GitHub 提供的服務和資源。
 
 ⸻
 
 2. workflow 檔（c_build.yml）：你／repo 作者提供
-* 	.github/workflows/c_build.yml 這個檔案裡寫的是：
-* 要在什麼事件觸發（push、pull_request…）
-* 要跑哪些步驟（checkout、安裝工具、編譯、測試、上傳 artifact…）
-* 這些內容是 repo 的維護者（也就是你或專案作者）自己寫的設定，GitHub 只是照著你寫的流程在雲端跑。
-
+  * 	.github/workflows/c_build.yml 這個檔案裡寫的是：
+  * 要在什麼事件觸發（push、pull_request…）
+  * 要跑哪些步驟（checkout、安裝工具、編譯、測試、上傳 artifact…）
+  * 這些內容是 repo 的維護者（也就是你或專案作者）自己寫的設定，GitHub 只是照著你寫的流程在雲端跑。
+  
 ⸻
 
 3. 裡面用到的 actions（小積木）：GitHub 或社群提供
