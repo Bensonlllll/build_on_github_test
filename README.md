@@ -92,25 +92,25 @@ int main(){
 還沒有做到真正「部署到伺服器 / 使用者端」那種完整 CD。
 
 接下來若要進一步變成「完整 CI/CD」，就可以在 workflow 裡再加：
-	•	自動打包成壓縮檔 / 安裝檔
-	•	上傳到 GitHub Releases 或 GitHub Packages
-	•	或是部署到某個測試伺服器（例如用 scp、ssh、docker push 等）。
+* 自動打包成壓縮檔 / 安裝檔
+* 上傳到 GitHub Releases 或 GitHub Packages
+* 或是部署到某個測試伺服器（例如用 scp、ssh、docker push 等）。
 
 ### 問題2: .github/workflows/c_build.yml 這個是什麼？有沒有比較正式的名稱？
 #### 答案2:
 它就是 GitHub Actions 的工作流程設定檔（workflow file）。
 比較正式一點可以這樣叫：
-	•	GitHub Actions workflow file
-	•	或中文：GitHub Actions 工作流程設定檔 / CI 工作流程檔
+* GitHub Actions workflow file
+* 或中文：GitHub Actions 工作流程設定檔 / CI 工作流程檔
 
 順便拆一下這個檔名與路徑的意思：
-	•	.github/workflows/
-	•	這是 GitHub 規定放 Actions 設定檔的資料夾。
-	•	只要有放在這裡的 .yml / .yaml 檔，GitHub 就會把它當作一個 workflow。
-	•	c_build.yml
-	•	只是你自訂的檔名，用來表示「這個 workflow 是拿來 build C 程式的」。
-	•	在 GitHub UI 上顯示的工作流程名稱，則是檔案裡 name: 那一行（如果有寫）；
-檔名只是在 repo 裡方便你區分不同 workflow。
+* github/workflows/
+  * 這是 GitHub 規定放 Actions 設定檔的資料夾。
+  * 只要有放在這裡的 .yml / .yaml 檔，GitHub 就會把它當作一個 workflow。
+* c_build.yml
+  * 只是你自訂的檔名，用來表示「這個 workflow 是拿來 build C 程式的」。
+  * 在 GitHub UI 上顯示的工作流程名稱，則是檔案裡 name: 那一行（如果有寫）；
+  * 檔名只是在 repo 裡方便你區分不同 workflow。
 
 
 
@@ -121,11 +121,11 @@ int main(){
 ⸻
 
 1. CI/CD 平台與跑程式的機器：GitHub 提供
-	•	你在 .github/workflows/*.yml 裡寫的這些 workflows，實際上是交給 GitHub Actions 這個服務來執行。
-	•	GitHub（背後是 Microsoft 的雲端資源） 會在你 push、開 PR 等時，啟動一台暫時的虛擬機（runner），例如：
-	•	runs-on: ubuntu-latest → 就是在 GitHub 的雲端開一台 Ubuntu VM
-	•	也可以是 windows-latest、macos-latest
-	•	這些 VM 的 硬體資源、網路、作業系統 等，都是 GitHub 幫你準備好 的（對 public repo 免費、有使用額度限制）。
+* 你在 .github/workflows/*.yml 裡寫的這些 workflows，實際上是交給 GitHub Actions 這個服務來執行。
+* GitHub（背後是 Microsoft 的雲端資源） 會在你 push、開 PR 等時，啟動一台暫時的虛擬機（runner），例如：
+* runs-on: ubuntu-latest → 就是在 GitHub 的雲端開一台 Ubuntu VM
+* 也可以是 windows-latest、macos-latest
+* 這些 VM 的 硬體資源、網路、作業系統 等，都是 GitHub 幫你準備好 的（對 public repo 免費、有使用額度限制）。
 
 簡單講：
 CI/CD 平台（GitHub Actions） + 執行工作用的機器（GitHub-hosted runners）都是 GitHub 提供的服務和資源。
@@ -133,10 +133,10 @@ CI/CD 平台（GitHub Actions） + 執行工作用的機器（GitHub-hosted runn
 ⸻
 
 2. workflow 檔（c_build.yml）：你／repo 作者提供
-	•	.github/workflows/c_build.yml 這個檔案裡寫的是：
-	•	要在什麼事件觸發（push、pull_request…）
-	•	要跑哪些步驟（checkout、安裝工具、編譯、測試、上傳 artifact…）
-	•	這些內容是 repo 的維護者（也就是你或專案作者）自己寫的設定，GitHub 只是照著你寫的流程在雲端跑。
+* 	.github/workflows/c_build.yml 這個檔案裡寫的是：
+* 要在什麼事件觸發（push、pull_request…）
+* 要跑哪些步驟（checkout、安裝工具、編譯、測試、上傳 artifact…）
+* 這些內容是 repo 的維護者（也就是你或專案作者）自己寫的設定，GitHub 只是照著你寫的流程在雲端跑。
 
 ⸻
 
@@ -147,12 +147,12 @@ CI/CD 平台（GitHub Actions） + 執行工作用的機器（GitHub-hosted runn
 uses: actions/checkout@v4
 uses: actions/upload-artifact@v4
 
-	•	actions/checkout、actions/upload-artifact 這些叫做 actions，就像「現成的小模組」。
-	•	有些是 GitHub 官方維護 的（像上面那兩個）。
-	•	也有很多是 社群 / 公司 / 個人開發者 放到 GitHub Marketplace 上給大家用的。
+* actions/checkout、actions/upload-artifact 這些叫做 actions，就像「現成的小模組」。
+* 有些是 GitHub 官方維護 的（像上面那兩個）。
+* 也有很多是 社群 / 公司 / 個人開發者 放到 GitHub Marketplace 上給大家用的。
 
 所以：
-	•	平台與運算資源：GitHub 提供
-	•	流程邏輯（workflow yml）：你或專案作者寫
-	•	actions 模組：GitHub 官方 + 社群共同提供
+* 平台與運算資源：GitHub 提供
+* 流程邏輯（workflow yml）：你或專案作者寫
+* actions 模組：GitHub 官方 + 社群共同提供
 
