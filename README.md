@@ -1,73 +1,140 @@
-# C 語言建置與驗證流程 (GitHub Actions Demo)
-這是一個簡單的示範專案，展示如何使用 **GitHub Actions** 自動化建置 (Compile)、運行 (Run) 和驗證 (Validate) 一個基本的 C 語言程式。
+# C 語言建置與驗證流程 - 加強版 (GitHub Actions Demo)
 
 ## 專案簡介
-本專案包含一個簡單的 C 語言程式 main.c，以及一個 GitHub Actions 工作流程配置檔案 .github/workflows/c_build.yml，用於在每次程式碼推送 (Push) 時自動執行以下任務：
+本專案 fork 自 [Bensonlllll/build_on_github_test](https://github.com/Bensonlllll/build_on_github_test)，在原本的基礎上新增了以下功能：
+
+### 新增功能
+- **使用 curl 下載測試資料**：自動從網路下載文字檔案作為測試輸入
+- **檔案 I/O 處理**：改寫 `main.c` 使用命令列參數讀取輸入檔並寫入輸出檔
+- **自動化測試驗證**：比對輸入與輸出檔案，確保程式正確性
+
+### GitHub Actions 工作流程
+本專案使用 `.github/workflows/c_build.yml` 配置檔案，在每次程式碼推送時自動執行：
 1. 取得程式碼 (Checkout)
-2. 編譯程式 (GCC)
-3. 運行並驗證程式 (Execution)
-4. 上傳建置成品 (Artifact)
+2. 編譯 C 程式 (GCC)
+3. 使用 curl 下載測試資料
+4. 執行檔案複製程式
+5. 驗證輸出結果 (自動化測試)
+6. 上傳建置成品 (Artifact)
 
 ## 檔案結構
-```.
+
+```text
+.
 ├── .github/
 │   └── workflows/
 │       └── c_build.yml  # GitHub Actions 工作流程定義
-└── main.c               # 核心 C 語言程式
+└── main.c               # 核心 C 語言程式（檔案複製功能）
 ```
 
 ## main.c
-此程式的功能是簡單地印出一串問候語，並計算並印出 $5 \times 32$ 的結果。
-```
-#include <stdio.h>
 
-int main(){
-  printf("Hello From C Build on Github Actions!\n");
-  int a=5;
-  int b=32;
-  int mul = a * b;
-  printf("%d\n", mul); // 預期輸出 160
+此程式改寫為檔案複製工具，使用命令列參數指定輸入和輸出檔案：
+
+```c
+#include <stdio.h>
+#include <stdlib.h>
+
+int main(int argc, char *argv[]){
+  // 檢查命令列參數是否正確
+  if(argc != 3){
+    printf("使用方式: %s <輸入檔案> <輸出檔案>\n", argv[0]);
+    return 1;
+  }
+  
+  // 開啟輸入檔案並讀取
+  FILE *input_file = fopen(argv[1], "r");
+  if(input_file == NULL){
+    printf("錯誤: 無法開啟輸入檔案 '%s'\n", argv[1]);
+    return 1;
+  }
+  
+  // 開啟輸出檔案並寫入
+  FILE *output_file = fopen(argv[2], "w");
+  if(output_file == NULL){
+    printf("錯誤: 無法開啟輸出檔案 '%s'\n", argv[2]);
+    fclose(input_file);
+    return 1;
+  }
+  
+  // 逐字元讀取並寫入
+  int ch;
+  while((ch = fgetc(input_file)) != EOF){
+    fputc(ch, output_file);
+  }
+  
+  // 關閉檔案
+  fclose(input_file);
+  fclose(output_file);
+  
+  printf("成功將 '%s' 複製到 '%s'\n", argv[1], argv[2]);
   return 0;
 }
 ```
 
 ## GitHub Actions 工作流程 (`c_build.yml`)
 
-這個範例的工作流程名稱為 "**C 語言建置流程**"，它會在任何分支發生 push 事件時被觸發，並在最新的 **Ubuntu** 虛擬機上執行。
+這個加強版工作流程名稱為 "**C 語言建置流程**"，它會在任何分支發生 push 事件時被觸發，並在最新的 **Ubuntu** 虛擬機上執行。
 
 ### Build Job 步驟詳解
 
 #### 1. Checkout code
-指令：`actions/checkout@v4`  
+
+指令：`actions/checkout@v4`
 功能：取得 repo 中的程式碼。
 
 #### 2. Compile C program (GCC)
-指令：`gcc main.c -o hello_c_app`  
-功能：使用 GCC 編譯器，將 `main.c` 編譯成名為 `hello_c_app` 的可執行檔。
 
-#### 3. Run compiled application
-指令：`./hello_c_app`  
-功能：執行編譯後的可執行檔。此步驟會輸出程式的執行結果 (例如：`Hello...` 和 `160`)，並作為工作流程的驗證日誌。
+指令：`gcc main.c -o by_pass_c`
+功能：使用 GCC 編譯器，將 `main.c` 編譯成名為 `by_pass_c` 的可執行檔。
 
-#### 4. Upload build artifact
-指令：`actions/upload-artifact@v4`  
-功能：將編譯好的 `hello_c_app` 可執行檔上傳為名為 `hello-c-executable` 的建置成品 (Artifact)，方便使用者下載驗證。
+#### 3. Download text file with curl
+
+指令：`curl -o cano.txt https://sherlock-holm.es/stories/plain-text/cano.txt`
+功能：使用 curl 從網路下載 "The Adventure of the Yellow Face" 文字檔作為測試資料。
+
+#### 4. Run compiled application
+
+指令：`./by_pass_c cano.txt output.txt`
+功能：執行編譯後的程式，讀取 `cano.txt` 並複製到 `output.txt`。
+
+#### 5. Verify output file
+
+指令：`diff cano.txt output.txt`
+功能：使用 diff 命令比對輸入和輸出檔案。
+- 如果內容相同：顯示 "✓ 測試通過: output.txt 與 cano.txt 內容相同"
+- 如果內容不同：顯示 "✗ 測試失敗: output.txt 與 cano.txt 內容不同" 並回傳錯誤，導致 workflow 失敗
+
+#### 6. Upload build artifact
+
+指令：`actions/upload-artifact@v4`
+功能：將編譯好的 `by_pass_c` 可執行檔上傳為建置成品 (Artifact)，方便下載驗證。
 
 ## 如何運行與查看結果
-1. **推送程式碼**： 
-將本專案的程式碼 (特別是 `.github/workflows/c_build.yml` 和 `main.c`) `push` 到 GitHub 倉庫的任何分支。
 
-2. **查看 Actions**： 
-導航至 GitHub 倉庫的 **Actions** 頁籤。
+1. **推送程式碼**：
+   將本專案的程式碼推送到 GitHub 倉庫的任何分支。
 
-3. **選擇工作流程**： 
-點擊名為 "**C 語言建置流程**" 的運行紀錄。
+2. **查看 Actions**：
+   導航至 GitHub 倉庫的 **Actions** 頁籤。
+
+3. **選擇工作流程**：
+   點擊名為 "**C 語言建置流程**" 的運行紀錄。
 
 4. **檢查日誌**：
-在 **Run compiled application** 步驟中，可以查看到程式的實際輸出 (`Hello From C Build...` 和 `160`)，以驗證程式是否正確運行。
+   在各個步驟中查看執行結果，特別是 **Verify output file** 步驟可以確認測試是否通過。
 
 5. **下載成品**：
-在工作流程運行成功後，可以在摘要頁面找到並下載名為 `hello-c-executable` 的 **Artifact**，這就是編譯好的程式。
+   在工作流程運行成功後，可以在摘要頁面找到並下載名為 `by_pass_c-executable` 的 **Artifact**。
+
+## 改進重點
+
+相較於原始版本，本專案加入了：
+
+1. **實際的檔案 I/O 操作**：程式從簡單的 printf 改為完整的檔案讀寫功能
+2. **網路資料下載**：使用 curl 自動獲取測試資料
+3. **自動化測試**：使用 diff 驗證程式輸出的正確性
+4. **錯誤處理**：測試失敗時會導致 CI 流程失敗，確保程式品質
 
 
 ## 問與答（many thanks to ChatGPT!)
