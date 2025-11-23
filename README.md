@@ -1,21 +1,15 @@
 # C 語言建置與驗證流程 - 加強版 (GitHub Actions Demo)
 
 ## 專案簡介
+
 本專案 fork 自 [Bensonlllll/build_on_github_test](https://github.com/Bensonlllll/build_on_github_test)，在原本的基礎上新增了以下功能：
 
 ### 新增功能
+
 - **使用 curl 下載測試資料**：自動從網路下載文字檔案作為測試輸入
 - **檔案 I/O 處理**：改寫 `main.c` 使用命令列參數讀取輸入檔並寫入輸出檔
 - **自動化測試驗證**：比對輸入與輸出檔案，確保程式正確性
-
-### GitHub Actions 工作流程
-本專案使用 `.github/workflows/c_build.yml` 配置檔案，在每次程式碼推送時自動執行：
-1. 取得程式碼 (Checkout)
-2. 編譯 C 程式 (GCC)
-3. 使用 curl 下載測試資料
-4. 執行檔案複製程式
-5. 驗證輸出結果 (自動化測試)
-6. 上傳建置成品 (Artifact)
+- **雙 Workflow 設計**：提供簡易版和完整版兩種 CI/CD 流程
 
 ## 檔案結構
 
@@ -23,9 +17,59 @@
 .
 ├── .github/
 │   └── workflows/
-│       └── c_build.yml  # GitHub Actions 工作流程定義
-└── main.c               # 核心 C 語言程式（檔案複製功能）
+│       ├── c_build-1.yml  # 簡易版工作流程（僅編譯和上傳）
+│       └── c_build-2.yml  # 完整版工作流程（含測試驗證）
+├── main.c                  # C 語言檔案複製程式
+└── README.md               # 專案說明文件
 ```
+
+## GitHub Actions 工作流程設計
+
+本專案提供兩個 workflow 檔案，方便比較不同複雜度的 CI/CD 流程：
+
+### 🔹 c_build-1.yml - 最簡易版本
+
+**名稱**：最簡易 C 語言建置流程
+
+**功能**：展示最基本的編譯和發布流程
+
+**步驟**：
+
+1. Checkout 程式碼
+2. 使用 GCC 編譯 `main.c` → `by_pass_c`
+3. 上傳可執行檔為 Artifact
+
+**適用場景**：學習基礎 CI/CD 概念、快速驗證編譯是否成功
+
+### 🔹 c_build-2.yml - 完整版本
+
+**名稱**：C 語言建置流程
+
+**功能**：完整的 CI/CD 流程，包含測試驗證
+
+**步驟**：
+
+1. Checkout 程式碼
+2. 使用 GCC 編譯 `main.c` → `by_pass_c`
+3. 使用 curl 下載測試資料 (`cano.txt`)
+4. 執行程式進行檔案複製 (`cano.txt` → `output.txt`)
+5. 使用 diff 驗證輸出正確性（測試環節）
+6. 上傳可執行檔為 Artifact
+7. 上傳輸出檔案為 Artifact
+
+**適用場景**：生產環境、需要自動化測試確保程式正確性
+
+### 兩者差異比較
+
+| 項目 | c_build-1.yml | c_build-2.yml |
+|------|---------------|---------------|
+| 編譯程式 | ✓ | ✓ |
+| 下載測試資料 | ✗ | ✓ (curl) |
+| 執行測試 | ✗ | ✓ (diff 驗證) |
+| 上傳可執行檔 | ✓ | ✓ |
+| 上傳測試結果 | ✗ | ✓ (output.txt) |
+| 複雜度 | 低 | 中 |
+| 適合學習 | 基礎概念 | 完整流程 |
 
 ## main.c
 
@@ -72,42 +116,47 @@ int main(int argc, char *argv[]){
 }
 ```
 
-## GitHub Actions 工作流程 (`c_build.yml`)
+## GitHub Actions 工作流程詳細說明
 
-這個加強版工作流程名稱為 "**C 語言建置流程**"，它會在任何分支發生 push 事件時被觸發，並在最新的 **Ubuntu** 虛擬機上執行。
-
-### Build Job 步驟詳解
+### c_build-2.yml 完整版步驟解析
 
 #### 1. Checkout code
 
 指令：`actions/checkout@v4`
+
 功能：取得 repo 中的程式碼。
 
 #### 2. Compile C program (GCC)
 
 指令：`gcc main.c -o by_pass_c`
+
 功能：使用 GCC 編譯器，將 `main.c` 編譯成名為 `by_pass_c` 的可執行檔。
 
 #### 3. Download text file with curl
 
 指令：`curl -o cano.txt https://sherlock-holm.es/stories/plain-text/cano.txt`
+
 功能：使用 curl 從網路下載 "The Adventure of the Yellow Face" 文字檔作為測試資料。
 
 #### 4. Run compiled application
 
 指令：`./by_pass_c cano.txt output.txt`
+
 功能：執行編譯後的程式，讀取 `cano.txt` 並複製到 `output.txt`。
 
 #### 5. Verify output file
 
 指令：`diff cano.txt output.txt`
+
 功能：使用 diff 命令比對輸入和輸出檔案。
+
 - 如果內容相同：顯示 "✓ 測試通過: output.txt 與 cano.txt 內容相同"
 - 如果內容不同：顯示 "✗ 測試失敗: output.txt 與 cano.txt 內容不同" 並回傳錯誤，導致 workflow 失敗
 
 #### 6. Upload build artifact
 
 指令：`actions/upload-artifact@v4`
+
 功能：將編譯好的 `by_pass_c` 可執行檔上傳為建置成品 (Artifact)，方便下載驗證。
 
 ## 如何運行與查看結果
@@ -135,6 +184,13 @@ int main(int argc, char *argv[]){
 2. **網路資料下載**：使用 curl 自動獲取測試資料
 3. **自動化測試**：使用 diff 驗證程式輸出的正確性
 4. **錯誤處理**：測試失敗時會導致 CI 流程失敗，確保程式品質
+5. **雙 Workflow 設計**：提供簡易版和完整版，方便學習不同階段的 CI/CD 概念
+
+## 學習建議
+
+- **初學者**：先從 `c_build-1.yml` 開始，理解基本的編譯和發布流程
+- **進階學習**：研究 `c_build-2.yml`，了解如何加入測試和驗證步驟
+- **實務應用**：參考完整版的設計模式，應用到自己的專案中
 
 
 ## 問與答（many thanks to ChatGPT!)
